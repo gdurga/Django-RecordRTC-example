@@ -1,0 +1,132 @@
+{% load static %}  
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+  </form>
+
+<style>
+    html, body {
+        margin: 0!important;
+        padding: 0!important;
+        overflow: hidden!important;
+        width: 100%;
+    }
+</style>
+
+<title>16khz Audio Recording using RecordRTC</title>
+<h1>16khz Audio Recording using RecordRTC</h1>
+
+<br>
+<button id="btn-start-recording">Start Recording</button>
+<button id="btn-stop-recording" disabled>Stop Recording</button>
+
+<hr>
+<audio controls autoplay></audio>
+
+<script src="{% static 'js/RecordRTC.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script>
+
+var audio = document.querySelector('audio');
+
+function captureMicrophone(callback) {
+    navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia;
+    navigator.getUserMedia({audio: true}, callback, function(error) {
+        alert('Unable to access your microphone.');
+        console.error(error);
+    });
+}
+
+function stopRecordingCallback() {
+    var blob = recorder.getBlob();
+    audio.src = URL.createObjectURL(blob);
+    audio.play();
+
+    recorder.microphone.stop();
+}
+
+var recorder; // globally accessible
+
+document.getElementById('btn-start-recording').onclick = function() {
+    this.disabled = true;
+    captureMicrophone(function(microphone) {
+        audio.src = URL.createObjectURL(microphone);
+        audio.play();
+
+        recorder = RecordRTC(microphone, {
+            recorderType: StereoAudioRecorder,
+            type: "audio",
+            bufferSize: 0,
+            sampleRate: 44100,
+            leftChannel: false,
+            disableLogs: false,
+            recorderType: null,
+            mimeType: "audio/ogg",
+            checkForInactiveTracks: false
+        });
+
+        recorder.startRecording();
+
+        // release microphone on stopRecording
+        recorder.microphone = microphone;
+
+        document.getElementById('btn-stop-recording').disabled = false;
+    });
+};
+
+document.getElementById('btn-stop-recording').onclick = function() {
+    this.disabled = true;
+    recorder.stopRecording(stopRecordingCallback);
+
+    //recorder.save();
+
+    //invokeSaveAsDialog(file, file.name);
+    //$("#id_foto").val(recorder.blob);
+
+};
+            function uploadToServer(recordRTC, callback) {
+                var blob = recordRTC instanceof Blob ? recordRTC : recordRTC.blob;
+                var fileType = blob.type.split('/')[0] || 'audio';
+                var fileName = (Math.random() * 1000).toString().replace('.', '');
+                if (fileType === 'audio') {
+                    fileName += '.' + (!!navigator.mozGetUserMedia ? 'ogg' : 'wav');
+                } else {
+                    fileName += '.webm';
+                }
+                // create FormData
+                var formData = new FormData();
+                formData.append(fileType + '-filename', fileName);
+                formData.append(fileType + '-blob', blob);
+                callback('Uploading ' + fileType + ' recording to server.');
+                makeXMLHttpRequest('save.php', formData, function(progress) {
+                    if (progress !== 'upload-ended') {
+                        callback(progress);
+                        return;
+                    }
+                    var initialURL = location.href.replace(location.href.split('/').pop(), '') + 'uploads/';
+                    callback('ended', initialURL + fileName);
+                    // to make sure we can delete as soon as visitor leaves
+                    listOfFilesUploaded.push(initialURL + fileName);
+                });
+            }
+
+function enviar(){
+	var fd = new FormData();
+	fd.append('data', recorder.blob, + new Date() + '.' + recorder.blob.type.split('/')[1]);
+    fd.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+	fd.append('descricao', 'teste123');
+	$.ajax({
+	    type: 'POST',
+	    url: '/up',
+	    data: fd,
+	    processData: false,
+	    contentType: false
+	}).done(function(data) {
+	       console.log('ok');
+    }).fail(function(err) {
+        console.log(err);
+    });
+}
+</script>
+

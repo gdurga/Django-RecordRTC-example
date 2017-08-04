@@ -1,0 +1,30 @@
+# Python #
+##########
+*.py[cod]
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.sqlite3
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+#._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup from text editors #
+############################
+*~
+*.bak
+*.swp
+
+# Local Config #
+################
+audio_uploads/*
