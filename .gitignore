@@ -28,3 +28,5 @@ Thumbs.db
 # Local Config #
 ################
 audio_uploads/*
+main/migrations/*
+media/*

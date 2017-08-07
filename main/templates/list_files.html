@@ -1,0 +1,62 @@
+{% load static %}  
+<html>
+    <head>
+        <title>List files</title>
+        <style>
+            html, body {
+                margin: 0!important;
+                padding: 0!important;
+                overflow: hidden!important;
+                width: 100%;
+            }
+            table {
+                border-collapse: collapse;
+            }
+
+            table, th, td {
+                border: 1px solid #ddd;
+                padding: 10px;
+            }
+            tr:hover {
+                background-color: #f5f5f5
+            }
+            tr:nth-child(even) {
+                background-color: #f2f2f2
+            }
+            th {
+                background-color: #4CAF50;
+                color: white;
+            }
+        </style>
+
+        <script src="{% static 'js/RecordRTC.js' %}"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    </head>
+    <body>
+        <h1>List files | <a href='/'>Add new</a></h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Upload time</th>
+                    <th>File</th>
+                </tr>
+            </thead>
+                {% for f in files %}
+                    <tr>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.uploaded_at }}</td>
+                        <td>
+                            <audio controls>
+                                <source src="{{ f.fl.url }}">
+                                Your browser does not support the audio element.
+                            </audio> 
+                        </td>
+                    </tr>
+                {% endfor %}
+            <tbody>
+            </tbody>
+        </table>
+    </body>
+</html>

@@ -1,27 +1,28 @@
-from django.http import HttpResponse
+from django.core.files.base import File
 from django.shortcuts import render, redirect
 from main.forms import AudioflForm
-from django.core.files.base import File
-import datetime
-
-def current_datetime(request):
-    now = datetime.datetime.now()
-    html = "<html><body>It is now %s.</body></html>" % now
-    return HttpResponse(html)
+from main.models import Audiofl
 
 
 def model_form_upload(request):
-    from django.core.files.storage import FileSystemStorage
     if request.method == 'POST':
         form = AudioflForm(request.POST, request.FILES)
         if form.is_valid():
-            novo = form.save(commit=False)
-            djfile = File(request.FILES['data'])
-            novo.foto.save(request.FILES['data'].name, djfile)
-            novo.save()
-            return redirect('/up')
+            newform = form.save(commit=False)
+            djfile = File(request.FILES['data_blob'])
+            newform.fl.save(request.FILES['data_blob'].name, djfile)
+            newform.save()
+            return redirect('/')
     else:
         form = AudioflForm()
     return render(request, 'model_form_upload.html', {
         'form': form
+    })
+
+
+def list_files(request):
+    files = Audiofl.objects.all().order_by('uploaded_at')
+
+    return render(request, 'list_files.html', {
+        'files': files
     })
