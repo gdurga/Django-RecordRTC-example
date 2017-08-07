@@ -7,5 +7,5 @@
 
 --------------------------------------------------
 
-Works fine on Chrome Versão 60.0.3112.90 (64 bits)
-Doesn't work on Firefox 54.0.1 (64-bit)
+* Works fine on Chrome 60.0.3112.90 (64 bits)
+* Doesn't work on Firefox 54.0.1 (64-bit)
