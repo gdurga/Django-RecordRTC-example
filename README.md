@@ -4,8 +4,3 @@
 2. python manage.py makemigrations
 2. python manage.py migrate
 3. python manage.py runserver
-
---------------------------------------------------
-
-* Works fine on Chrome 60.0.3112.90 (64 bits)
-* Doesn't work on Firefox 54.0.1 (64-bit)
