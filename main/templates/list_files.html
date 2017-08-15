@@ -3,12 +3,7 @@
     <head>
         <title>List files</title>
         <style>
-            html, body {
-                margin: 0!important;
-                padding: 0!important;
-                overflow: hidden!important;
-                width: 100%;
-            }
+
             table {
                 border-collapse: collapse;
             }
@@ -43,6 +38,7 @@
                     <th>File</th>
                 </tr>
             </thead>
+            <tbody>
                 {% for f in files %}
                     <tr>
                         <td>{{ f.description }}</td>
@@ -55,7 +51,6 @@
                         </td>
                     </tr>
                 {% endfor %}
-            <tbody>
             </tbody>
         </table>
     </body>

@@ -29,7 +29,9 @@
         <audio controls autoplay></audio>
         <br>
 
-        <button style="margin-top: 10px;" onclick="postData()">Upload</button>
+        <button style="margin-top: 10px;" onclick="postData()" id='upload-btn'>Upload</button>
+        <progress id="progress" value="0"></progress>
+        <span id="display"></span>
 
         <script>
             var audio = document.querySelector('audio');
@@ -60,14 +62,14 @@
 
                     recorder = RecordRTC(microphone, {
                         recorderType: StereoAudioRecorder,
-                        type: "audio",
-                        bufferSize: 0,
-                        sampleRate: 44100,
-                        leftChannel: false,
-                        disableLogs: false,
-                        recorderType: null,
-                        mimeType: "audio/ogg",
-                        checkForInactiveTracks: false
+                        //type: "audio",
+                        //bufferSize: 10,
+                        //sampleRate: 44100,
+                        //leftChannel: false,
+                        //disableLogs: false,
+                        //recorderType: null,
+                        mimeType: "audio/wav",
+                        //checkForInactiveTracks: false
                     });
 
                     recorder.startRecording();
@@ -89,19 +91,34 @@
                 fd.append('csrfmiddlewaretoken', "{{ csrf_token }}");
                 fd.append('data_blob', recorder.blob, + new Date() + '.' + recorder.blob.type.split('/')[1]);
                 fd.append('description', $("#id_description").val());
-                $.ajax({
-                    type: 'POST',
-                    url: '/',
-                    data: fd,
-                    processData: false,
-                    contentType: false
-                }).done(function(data) {
-                    alert('Success');
-                    location.reload();
-                }).fail(function(err) {
-                    alert(err);
-                    location.reload();
-                });
+
+                var progressBar = document.getElementById("progress"),
+                  display = document.getElementById("display");
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/', true);
+                if (xhr.upload) {
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable) {
+                            progressBar.max = e.total;
+                            progressBar.value = e.loaded;
+                            display.innerText = Math.floor((e.loaded / e.total) * 100) + '%';
+                        }
+                    }
+                    xhr.upload.onloadstart = function(e) {
+                        console.log("start");
+                        $("#upload-btn").prop('disabled', true);
+                        progressBar.value = 0;
+                        display.innerText = '0%';
+                    }
+                    xhr.upload.onloadend = function(e) {
+                        progressBar.value = e.loaded;
+                        display.innerText = display.innerText + " Concluido";
+                        $("#upload-btn").prop('disabled', false);
+                        setTimeout(function() { location.reload(); }, 3000);
+                    }
+                }
+                xhr.send(fd);
             }
         </script>
     </body>
