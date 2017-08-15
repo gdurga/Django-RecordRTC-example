@@ -26,7 +26,7 @@
         <button id="btn-stop-recording" disabled>Stop Recording</button>
 
         <hr>
-        <audio controls autoplay></audio>
+        <audio controls></audio>
         <br>
 
         <button style="margin-top: 10px;" onclick="postData()" id='upload-btn'>Upload</button>
@@ -47,6 +47,7 @@
             function stopRecordingCallback() {
                 var blob = recorder.getBlob();
                 audio.src = URL.createObjectURL(blob);
+                audio.muted = false;
                 audio.play();
 
                 recorder.microphone.stop();
@@ -58,17 +59,17 @@
                 this.disabled = true;
                 captureMicrophone(function(microphone) {
                     audio.src = URL.createObjectURL(microphone);
+                    audio.muted = true;
                     audio.play();
 
                     recorder = RecordRTC(microphone, {
-                        recorderType: StereoAudioRecorder,
-                        //type: "audio",
-                        //bufferSize: 10,
-                        //sampleRate: 44100,
-                        //leftChannel: false,
+                        recorderType: MediaStreamRecorder,
+                        type: "audio",
+                        bufferSize: 4096,
+                        sampleRate: 44100,
+                        //leftChannel: true,
                         //disableLogs: false,
-                        //recorderType: null,
-                        mimeType: "audio/wav",
+                        mimeType: "audio/webm",
                         //checkForInactiveTracks: false
                     });
 
