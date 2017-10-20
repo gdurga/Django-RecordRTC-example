@@ -69,8 +69,8 @@
                         sampleRate: 44100,
                         //leftChannel: true,
                         //disableLogs: false,
-                        mimeType: "audio/webm",
-                        //checkForInactiveTracks: false
+                        //mimeType: "audio/webm",
+                        checkForInactiveTracks: true
                     });
 
                     recorder.startRecording();
@@ -88,38 +88,42 @@
             };
 
             function postData(){
-                var fd = new FormData();
-                fd.append('csrfmiddlewaretoken', "{{ csrf_token }}");
-                fd.append('data_blob', recorder.blob, + new Date() + '.' + recorder.blob.type.split('/')[1]);
-                fd.append('description', $("#id_description").val());
+                if ($("#id_description").val() != ''){
+                    var fd = new FormData();
+                    fd.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+                    fd.append('data_blob', recorder.blob, + new Date() + '.' + recorder.blob.type.split('/')[1]);
+                    fd.append('description', $("#id_description").val());
 
-                var progressBar = document.getElementById("progress"),
-                  display = document.getElementById("display");
+                    var progressBar = document.getElementById("progress"),
+                      display = document.getElementById("display");
 
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/', true);
-                if (xhr.upload) {
-                    xhr.upload.onprogress = function(e) {
-                        if (e.lengthComputable) {
-                            progressBar.max = e.total;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/', true);
+                    if (xhr.upload) {
+                        xhr.upload.onprogress = function(e) {
+                            if (e.lengthComputable) {
+                                progressBar.max = e.total;
+                                progressBar.value = e.loaded;
+                                display.innerText = Math.floor((e.loaded / e.total) * 100) + '%';
+                            }
+                        }
+                        xhr.upload.onloadstart = function(e) {
+                            console.log("start");
+                            $("#upload-btn").prop('disabled', true);
+                            progressBar.value = 0;
+                            display.innerText = '0%';
+                        }
+                        xhr.upload.onloadend = function(e) {
                             progressBar.value = e.loaded;
-                            display.innerText = Math.floor((e.loaded / e.total) * 100) + '%';
+                            display.innerText = display.innerText + " Concluido";
+                            $("#upload-btn").prop('disabled', false);
+                            setTimeout(function() { location.reload(); }, 3000);
                         }
                     }
-                    xhr.upload.onloadstart = function(e) {
-                        console.log("start");
-                        $("#upload-btn").prop('disabled', true);
-                        progressBar.value = 0;
-                        display.innerText = '0%';
-                    }
-                    xhr.upload.onloadend = function(e) {
-                        progressBar.value = e.loaded;
-                        display.innerText = display.innerText + " Concluido";
-                        $("#upload-btn").prop('disabled', false);
-                        setTimeout(function() { location.reload(); }, 3000);
-                    }
+                    xhr.send(fd);
+                } else{
+                    alert("Please insert a description");
                 }
-                xhr.send(fd);
             }
         </script>
     </body>
