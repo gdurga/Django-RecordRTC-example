@@ -1,3 +1,4 @@
+import os
 from django.core.files.base import File
 from django.shortcuts import render, redirect
 from main.forms import AudioflForm
@@ -12,6 +13,18 @@ def model_form_upload(request):
             djfile = File(request.FILES['data_blob'])
             newform.fl.save(request.FILES['data_blob'].name, djfile)
             newform.save()
+
+            # convert to fix the duration of audio
+            file_path = newform.fl.path
+            os.system(
+                "/usr/bin/mv %s %s" % (
+                    file_path, (file_path + '.original'))
+            )
+            os.system(
+                "/usr/bin/ffmpeg -i %s -c copy -fflags +genpts %s" % (
+                    (file_path + '.original'), file_path)
+            )
+
             return redirect('/')
     else:
         form = AudioflForm()
